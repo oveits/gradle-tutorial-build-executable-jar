@@ -8,14 +8,15 @@ fi
 
 [ "$DEPENDENCY_JARS" == "" ] && DEPENDENCY_JARS=dependency-jars
 
+# Create backup of build.gradle file
+MILLISECONDS=`date +%N | cut -c1-3`; # did not work, but cut -c1-3 has worked: let MILLISECONDS/=1000000
+DATETIME=`date +"%Y-%m-%d-%H-%M"`.$MILLISECONDS
+cp -p build.gradle build.gradle.bak.$DATETIME
+
 # Remove automatically inserted content from build.gradle, if present
 if grep -q "# AUTOMATICALLY INSERTED" build.gradle; then 
   echo "build.gradle already has automatically inserted content. Cleaning now..."
-  # ...
-  MILLISECONDS=`date +%N | cut -c1-3`; # did not work, but cut -c1-3 has worked: let MILLISECONDS/=1000000
-  DATETIME=`date +"%Y-%m-%d-%H-%M"`.$MILLISECONDS
   cat build.gradle | sed '/^# AUTOMATICALLY INSERTED/,/^\# END AUTOMATICALLY INSERTED/d' > build.gradle.tmp
-  mv build.gradle build.gradle.bak.$DATETIME
   mv build.gradle.tmp build.gradle
 fi
 
