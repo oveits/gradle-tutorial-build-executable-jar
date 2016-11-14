@@ -20,3 +20,34 @@ dependencies {
     compile group: 'log4j', name: 'log4j', version:'1.2.17'
     testCompile group: 'junit', name: 'junit', version:'4.11'
 }
+
+# AUTOMATICALLY INSERTED
+// copy dependency jars to build/libs/dependency-jars 
+task copyJarsToLib (type: Copy) {
+    def toDir = "build/libs/dependency-jars"
+
+    // create directories, if not already done:
+    file(toDir).mkdirs()
+
+    // copy jars to lib folder:
+    from configurations.compile
+    into toDir
+}
+
+jar {
+    // exclude log properties (recommended)
+    exclude ("log4j.properties")
+
+    // make jar executable: see http://stackoverflow.com/questions/21721119/creating-runnable-jar-with-gradle
+    manifest {
+        attributes (
+            'Main-Class': 'com.mkyong.core.utils.App',
+            // add classpath to Manifest; see http://stackoverflow.com/questions/30087427/add-classpath-in-manifest-file-of-jar-in-gradle
+            "Class-Path": '. dependency-jars/' + configurations.compile.collect { it.getName() }.join(' dependency-jars/')
+            )
+    }
+}
+
+// always call copyJarsToLib when building jars:
+jar.dependsOn copyJarsToLib
+# END AUTOMATICALLY INSERTED 
