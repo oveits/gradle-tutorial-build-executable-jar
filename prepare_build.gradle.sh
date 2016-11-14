@@ -9,13 +9,18 @@ fi
 [ "$DEPENDENCY_JARS" == "" ] && DEPENDENCY_JARS=dependency-jars
 
 # Remove automatically inserted content from build.gradle, if present
-if grep "# AUTOMATICALLY INSERTED" build.gradle; then 
+if grep -q "# AUTOMATICALLY INSERTED" build.gradle; then 
   echo "build.gradle already has automatically inserted content. Cleaning now..."
   # ...
-  cat build.gradle | sed '/^# AUTOMATICALLY INSERTED/,/^\# END AUTOMATICALLY INSERTED/{/^# AUTOMATICALLY INSERTED/!{/^\# END AUTOMATICALLY INSERTED/!d}}'
+  MILLISECONDS=`date +%N | cut -c1-3`; # did not work, but cut -c1-3 has worked: let MILLISECONDS/=1000000
+  DATETIME=`date +"%Y-%m-%d-%H-%M"`.$MILLISECONDS
+  cat build.gradle | sed '/^# AUTOMATICALLY INSERTED/,/^\# END AUTOMATICALLY INSERTED/d' > build.gradle.tmp
+  mv build.gradle build.gradle.bak.$DATETIME
+  mv build.gradle.tmp build.gradle
 fi
 
 # Prepare to copy dependent Jars 
+echo "Preparing to copy dependent Jars"
 
 cat << ENDCOPYJARS >> build.gradle
 
@@ -34,6 +39,7 @@ task copyJarsToLib (type: Copy) {
 ENDCOPYJARS
 
 # Prepare the Creation of an executable JAR File
+echo "Preparing the Creation of an executable JAR File"
 
 cat << ENDCREATEJAR >> build.gradle
 
@@ -53,6 +59,7 @@ jar {
 ENDCREATEJAR
 
 # Define build Dependencies 
+echo "Defining build Dependencies"
 
 cat << ENDDEFINEBUILDDEPENDENCIES >> build.gradle
 
@@ -60,3 +67,5 @@ cat << ENDDEFINEBUILDDEPENDENCIES >> build.gradle
 jar.dependsOn copyJarsToLib
 # END AUTOMATICALLY INSERTED 
 ENDDEFINEBUILDDEPENDENCIES
+
+echo DONE
