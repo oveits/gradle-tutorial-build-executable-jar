@@ -14,9 +14,9 @@ DATETIME=`date +"%Y-%m-%d-%H-%M"`.$MILLISECONDS
 cp -p build.gradle build.gradle.bak.$DATETIME
 
 # Remove automatically inserted content from build.gradle, if present
-if grep -q "# AUTOMATICALLY INSERTED" build.gradle; then 
+if grep -q "// AUTOMATICALLY INSERTED" build.gradle; then 
   echo "build.gradle already has automatically inserted content. Cleaning now..."
-  cat build.gradle | sed '/^# AUTOMATICALLY INSERTED/,/^\# END AUTOMATICALLY INSERTED/d' > build.gradle.tmp
+  cat build.gradle | sed '/^\/\/ AUTOMATICALLY INSERTED/,/^\/\/ END AUTOMATICALLY INSERTED/d' > build.gradle.tmp
   mv build.gradle.tmp build.gradle
 fi
 
@@ -25,7 +25,7 @@ echo "Preparing to copy dependent Jars"
 
 cat << ENDCOPYJARS >> build.gradle
 
-# AUTOMATICALLY INSERTED
+// AUTOMATICALLY INSERTED
 // copy dependency jars to build/libs/$DEPENDENCY_JARS 
 task copyJarsToLib (type: Copy) {
     def toDir = "build/libs/$DEPENDENCY_JARS"
@@ -66,7 +66,7 @@ cat << ENDDEFINEBUILDDEPENDENCIES >> build.gradle
 
 // always call copyJarsToLib when building jars:
 jar.dependsOn copyJarsToLib
-# END AUTOMATICALLY INSERTED 
+// END AUTOMATICALLY INSERTED 
 ENDDEFINEBUILDDEPENDENCIES
 
 echo DONE
